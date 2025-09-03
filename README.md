@@ -205,7 +205,7 @@ decision-making for a company like Netflix.
 
 1. **Clone the Repository**: Clone this repository to your local machine.
    ```sh
-   [git clone https://github.com/Gitwithmohit/SQL_library_project_02.git](https://github.com/Gitwithmohit/SQL_Netflix_Project_03.git)
+   (https://github.com/Gitwithmohit/SQL_Netflix_Project_03.git)
    ```
 
 2. **Set Up the Database**: Execute the SQL scripts in the `Netflix_Business_Problems.sql` file to create and populate the database.
