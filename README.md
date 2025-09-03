@@ -2,10 +2,6 @@
 This project uses SQL to perform an in-depth analysis of a Netflix movies and TV shows dataset. By writing and executing various queries, we aim to uncover key trends and patterns in content distribution, ratings, and genre popularity. This README documents the core business questions and the SQL solutions used to derive meaningful insights.
 ![Netflix](PICTURE.png)
 
----
-title: Netflix Movies and TV Shows Data Analysis with SQL
----
-
 # Overview
 
 This project involves a comprehensive analysis of Netflix\'s movies and
