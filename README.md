@@ -28,22 +28,21 @@ The data for this project is sourced from a public Kaggle dataset.
 
 # Schema
 ```sql
-DROP TABLE IF EXISTS netflix;\
-\
-CREATE TABLE netflix\
-(\
-show_id VARCHAR(5),\
-type VARCHAR(10),\
-title VARCHAR(250),\
-director VARCHAR(550),\
-casts VARCHAR(1050),\
-country VARCHAR(550),\
-date_added VARCHAR(55),\
-release_year INT,\
-rating VARCHAR(15),\
-duration VARCHAR(15),\
-listed_in VARCHAR(250),\
-description VARCHAR(550)\
+DROP TABLE IF EXISTS netflix;
+CREATE TABLE netflix
+(
+	show_id VARCHAR(6),
+	type VARCHAR(10),	
+	title VARCHAR(150),
+	director VARCHAR(210),
+	casts VARCHAR(1000),
+	country	VARCHAR(150),
+	date_added VARCHAR(50),
+	release_year INT,
+	rating VARCHAR(10),
+	duration VARCHAR(15),
+	listed_in VARCHAR(100),
+	description VARCHAR(250)
 );
 ```
 # Business Problems and Solutions
@@ -52,25 +51,37 @@ description VARCHAR(550)\
 
 Objective: Determine the distribution of content types on Netflix.
 ```sql
-SELECT type, COUNT(\*) FROM netflix GROUP BY 1;
+SELECT 
+	type,
+	COUNT(*)
+FROM netflix
+GROUP BY 1;
 ```
 ## Find the Most Common Rating for Movies and TV Shows
 
 Objective: Identify the most frequently occurring rating for each type
 of content.
 ```sql
-WITH RatingCounts AS (\
-SELECT type, rating, COUNT(\*) AS rating_count\
-FROM netflix\
-GROUP BY type, rating\
-),\
-RankedRatings AS (\
-SELECT type, rating, rating_count,\
-RANK() OVER (PARTITION BY type ORDER BY rating_count DESC) AS rank\
-FROM RatingCounts\
-)\
-SELECT type, rating AS most_frequent_rating\
-FROM RankedRatings\
+WITH RatingCounts AS (
+    SELECT 
+        type,
+        rating,
+        COUNT(*) AS rating_count
+    FROM netflix
+    GROUP BY type, rating
+),
+RankedRatings AS (
+    SELECT 
+        type,
+        rating,
+        rating_count,
+        RANK() OVER (PARTITION BY type ORDER BY rating_count DESC) AS rank
+    FROM RatingCounts
+)
+SELECT 
+    type,
+    rating AS most_frequent_rating
+FROM RankedRatings
 WHERE rank = 1;
 ```
 
@@ -78,73 +89,93 @@ WHERE rank = 1;
 
 Objective: Retrieve all movies released in a specific year.
 ```sql
-SELECT \* FROM netflix WHERE release_year = 2020;
+Select * from netflix WHERE release_year = 2020;
 ```
 ## Find the Top 5 Countries with the Most Content on Netflix
 
 Objective: Identify the top 5 countries with the highest number of
 content items.
 ```sql
-SELECT \* FROM (\
-SELECT UNNEST(STRING_TO_ARRAY(country, \',\')) AS country, COUNT(\*) AS
-total_content\
-FROM netflix\
-GROUP BY 1\
-) AS t1\
-WHERE country IS NOT NULL\
-ORDER BY total_content DESC\
-LIMIT 5;
+SELECT	
+	UNNEST(STRING_TO_ARRAY(country , ',')) as new_country ,
+	Count(show_id) as total
+	from netflix
+	GROUP BY 1
+	Order by 2 DESC
+	LIMIT 5;
 ```
 ## Identify the Longest Movie
 
 Objective: Find the movie with the longest duration.
 ```sql
-SELECT \* FROM netflix WHERE type = \'Movie\' ORDER BY
-SPLIT_PART(duration, \' \', 1)::INT DESC;
+SELECT title , duration
+	From netflix
+	WHERE type = 'Movie'
+	ORDER BY SPLIT_PART(duration, ' ' , 1)::INT  DESC;
 ```
 ## Find Content Added in the Last 5 Years
 
 Objective: Retrieve content added to Netflix in the last 5 years.
 ```sql
-SELECT \* FROM netflix WHERE TO_DATE(date_added, \'Month DD, YYYY\') \>=
-CURRENT_DATE - INTERVAL \'5 years\';
+SELECT * from netflix
+
+WHERE TO_DATE(date_added , 'month DD, YYYY') >= CURRENT_DATE - INTERVAL '5 years';
 ```
 ## Find All Movies/TV Shows by Director \'Rajiv Chilaka\'
 
 Objective: List all content directed by \'Rajiv Chilaka\'.
 ```sql
-SELECT \* FROM (\
-SELECT \*, UNNEST(STRING_TO_ARRAY(director, \',\')) AS director_name\
-FROM netflix\
-) AS t WHERE director_name = \'Rajiv Chilaka\';
+SELECT *
+	FROM
+(
+
+SELECT 
+	*,
+	UNNEST(STRING_TO_ARRAY(director, ',')) as director_name
+FROM 
+netflix
+)
+WHERE 
+	director_name = 'Rajiv Chilaka';
 ```
 ## List All TV Shows with More Than 5 Seasons
 
 Objective: Identify TV shows with more than 5 seasons.
 ```sql
-SELECT \* FROM netflix WHERE type = \'TV Show\' AND SPLIT_PART(duration,
-\' \', 1)::INT \> 5;
+SELECT * from netflix
+WHERE type = 'TV Show'
+AND SPLIT_PART(duration, ' ' , 1)::INT > 5 ;
 ```
 ## Count the Number of Content Items in Each Genre
 
 Objective: Count the number of content items in each genre.
 ```sql
-SELECT UNNEST(STRING_TO_ARRAY(listed_in, \',\')) AS genre, COUNT(\*) AS
-total_content\
-FROM netflix GROUP BY 1;
+SELECT genre , Count(*) as total
+FROM
+(SELECT * ,
+	UNNEST (STRING_TO_ARRAY(listed_in, ',')) as genre
+	FROM netflix)
+	group bY 1
+	ORDER BY 2 DESC;
 ```
 ## Find each year and the average numbers of content release in India
 
 Objective: Return top 5 years with highest avg content release.
 ```sql
-SELECT country, release_year, COUNT(show_id) AS total_release,\
-ROUND(COUNT(show_id)::numeric /\
-(SELECT COUNT(show_id) FROM netflix WHERE country = \'India\')::numeric
-\* 100, 2) AS avg_release\
-FROM netflix\
-WHERE country = \'India\'\
-GROUP BY country, release_year\
-ORDER BY avg_release DESC\
+SELECT 
+	country,
+	release_year,
+	COUNT(show_id) as total_release,
+	ROUND(
+		COUNT(show_id)::numeric/
+								(SELECT COUNT(show_id) FROM netflix WHERE country = 'India')::numeric * 100 
+		,2
+		)
+		as avg_release
+FROM netflix
+WHERE country = 'India' 
+GROUP BY country, 2
+ORDER BY avg_release DESC 
 LIMIT 5;
 ```
 # Findings and Conclusion
